@@ -7,18 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		886EDD7A2C56EFB7008804DD /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886EDD792C56EFB7008804DD /* SplashScreen.swift */; };
+		886EDD7C2C57F4A3008804DD /* Winner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886EDD7B2C57F4A3008804DD /* Winner.swift */; };
+		886EDD7E2C5AE909008804DD /* HandPose_.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 886EDD7D2C5AE909008804DD /* HandPose_.mlmodel */; };
 		88D454992C4EFD2E002896F2 /* RSPApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D454982C4EFD2E002896F2 /* RSPApp.swift */; };
 		88D4549B2C4EFD2E002896F2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D4549A2C4EFD2E002896F2 /* ContentView.swift */; };
 		88D4549D2C4EFD2F002896F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88D4549C2C4EFD2F002896F2 /* Assets.xcassets */; };
 		88D454A02C4EFD2F002896F2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88D4549F2C4EFD2F002896F2 /* Preview Assets.xcassets */; };
+		88D4CF832C4F0937006FB26D /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D4CF822C4F0937006FB26D /* Camera.swift */; };
+		88FA40A12C53C8DF008651CB /* VideoPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FA40A02C53C8DF008651CB /* VideoPreviewView.swift */; };
+		88FA40A32C53D501008651CB /* RockPaperScissors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FA40A22C53D501008651CB /* RockPaperScissors.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		886EDD792C56EFB7008804DD /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
+		886EDD7B2C57F4A3008804DD /* Winner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Winner.swift; sourceTree = "<group>"; };
+		886EDD7D2C5AE909008804DD /* HandPose_.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = HandPose_.mlmodel; sourceTree = "<group>"; };
 		88D454952C4EFD2E002896F2 /* RSP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RSP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		88D454982C4EFD2E002896F2 /* RSPApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSPApp.swift; sourceTree = "<group>"; };
 		88D4549A2C4EFD2E002896F2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		88D4549C2C4EFD2F002896F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		88D4549F2C4EFD2F002896F2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		88D4CF822C4F0937006FB26D /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		88FA40A02C53C8DF008651CB /* VideoPreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoPreviewView.swift; sourceTree = "<group>"; };
+		88FA40A22C53D501008651CB /* RockPaperScissors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockPaperScissors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +65,12 @@
 			children = (
 				88D454982C4EFD2E002896F2 /* RSPApp.swift */,
 				88D4549A2C4EFD2E002896F2 /* ContentView.swift */,
+				88D4CF822C4F0937006FB26D /* Camera.swift */,
+				886EDD7B2C57F4A3008804DD /* Winner.swift */,
+				88FA40A22C53D501008651CB /* RockPaperScissors.swift */,
+				886EDD792C56EFB7008804DD /* SplashScreen.swift */,
+				88FA40A02C53C8DF008651CB /* VideoPreviewView.swift */,
+				886EDD7D2C5AE909008804DD /* HandPose_.mlmodel */,
 				88D4549C2C4EFD2F002896F2 /* Assets.xcassets */,
 				88D4549E2C4EFD2F002896F2 /* Preview Content */,
 			);
@@ -137,8 +155,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88D4CF832C4F0937006FB26D /* Camera.swift in Sources */,
+				88FA40A32C53D501008651CB /* RockPaperScissors.swift in Sources */,
+				886EDD7C2C57F4A3008804DD /* Winner.swift in Sources */,
+				886EDD7A2C56EFB7008804DD /* SplashScreen.swift in Sources */,
 				88D4549B2C4EFD2E002896F2 /* ContentView.swift in Sources */,
 				88D454992C4EFD2E002896F2 /* RSPApp.swift in Sources */,
+				88FA40A12C53C8DF008651CB /* VideoPreviewView.swift in Sources */,
+				886EDD7E2C5AE909008804DD /* HandPose_.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,7 +221,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -254,7 +278,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -275,11 +299,13 @@
 				DEVELOPMENT_TEAM = B67LY5435D;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "App uses camera";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -304,11 +330,13 @@
 				DEVELOPMENT_TEAM = B67LY5435D;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "App uses camera";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
