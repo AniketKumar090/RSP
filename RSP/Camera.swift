@@ -2,9 +2,8 @@ import Foundation
 import AVFoundation
 import Vision
 
-
 final class CameraManager: NSObject, ObservableObject {
-     let captureSession = AVCaptureSession()
+    let captureSession = AVCaptureSession()
     private var deviceInput: AVCaptureDeviceInput?
     private var videoOutput: AVCaptureVideoDataOutput?
     private let systemPreferredCamera = AVCaptureDevice.default(for: .video)
@@ -14,68 +13,132 @@ final class CameraManager: NSObject, ObservableObject {
     private let handPoseClassifier: HandPose_
     
     @Published var handPrediction: String?
-    @Published var predictionResult: String?
+    @Published var predictionConfidence: Float = 0.0
     @Published var errorMessage: String?
+    @Published var isSessionRunning = false
     
-    private var addToPreviewStream: ((CGImage) -> Void)?
+    // Enhanced detection parameters
+    private var recentPredictions: [String] = []
+    private let maxRecentPredictions = 5
     
-    lazy var previewStream: AsyncStream<CGImage> = {
-        AsyncStream { continuation in
-            self.addToPreviewStream = { cgImage in
-                continuation.yield(cgImage)
-            }
-        }
-    }()
+    // Session configuration state
+    private var isConfigured = false
     
     override init() {
         do {
             handPoseClassifier = try HandPose_(configuration: MLModelConfiguration())
             super.init()
+            
+            // Configure hand pose request for better accuracy
+            handPoseRequest.maximumHandCount = 1
+            handPoseRequest.revision = VNDetectHumanHandPoseRequestRevision1
+            
             Task {
-                do {
-                    try await configureSession()
-                    try await startSession()
-                } catch {
-                    self.errorMessage = "Failed to configure or start session: \(error.localizedDescription)"
-                }
+                await configureSession()
             }
         } catch {
             fatalError("Failed to load MLModel: \(error.localizedDescription)")
         }
     }
     
-    private func configureSession() async throws {
-        guard  await isAuthorized(),
+    private func configureSession() async {
+        guard await isAuthorized(),
               let camera = systemPreferredCamera else {
-            throw CameraManagerError.cameraSetupFailed
+            DispatchQueue.main.async {
+                self.errorMessage = "Camera setup failed"
+            }
+            return
         }
         
-        let deviceInput = try AVCaptureDeviceInput(device: camera)
-        let videoOutput = AVCaptureVideoDataOutput()
-        videoOutput.setSampleBufferDelegate(self, queue: sessionQueue)
-        
-        captureSession.beginConfiguration()
-        defer { captureSession.commitConfiguration() }
-        
-        guard captureSession.canAddInput(deviceInput) else {
-            throw CameraManagerError.inputAdditionFailed
+        do {
+            let deviceInput = try AVCaptureDeviceInput(device: camera)
+            let videoOutput = AVCaptureVideoDataOutput()
+            
+            // Configure video output for better performance
+            videoOutput.videoSettings = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+            ]
+            videoOutput.setSampleBufferDelegate(self, queue: sessionQueue)
+            
+            await MainActor.run {
+                captureSession.beginConfiguration()
+                
+                // Set session preset for better quality
+                if captureSession.canSetSessionPreset(.high) {
+                    captureSession.sessionPreset = .high
+                }
+                
+                guard captureSession.canAddInput(deviceInput) else {
+                    self.errorMessage = "Input addition failed"
+                    captureSession.commitConfiguration()
+                    return
+                }
+                captureSession.addInput(deviceInput)
+                
+                guard captureSession.canAddOutput(videoOutput) else {
+                    self.errorMessage = "Output addition failed"
+                    captureSession.commitConfiguration()
+                    return
+                }
+                captureSession.addOutput(videoOutput)
+                
+                captureSession.commitConfiguration()
+                
+                self.deviceInput = deviceInput
+                self.videoOutput = videoOutput
+                self.isConfigured = true
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to configure session: \(error.localizedDescription)"
+            }
         }
-        captureSession.addInput(deviceInput)
-        
-        guard captureSession.canAddOutput(videoOutput) else {
-            throw CameraManagerError.outputAdditionFailed
-        }
-        captureSession.addOutput(videoOutput)
-        
-        self.deviceInput = deviceInput
-        self.videoOutput = videoOutput
     }
     
-    private func startSession() async throws {
-        guard  await isAuthorized() else {
-            throw CameraManagerError.sessionStartFailed
+    func startSession() {
+        guard isConfigured else {
+            Task {
+                await configureSession()
+                if isConfigured {
+                    startSessionInternal()
+                }
+            }
+            return
         }
-        captureSession.startRunning()
+        
+        startSessionInternal()
+    }
+    
+    private func startSessionInternal() {
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            if !self.captureSession.isRunning {
+                self.captureSession.startRunning()
+                
+                DispatchQueue.main.async {
+                    self.isSessionRunning = true
+                    // Clear previous predictions when starting new session
+                    self.handPrediction = nil
+                    self.recentPredictions.removeAll()
+                }
+            }
+        }
+    }
+    
+    func stopSession() {
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            if self.captureSession.isRunning {
+                self.captureSession.stopRunning()
+                
+                DispatchQueue.main.async {
+                    self.isSessionRunning = false
+                    // Don't clear hand prediction when stopping - let it remain locked
+                }
+            }
+        }
     }
     
     private func isAuthorized() async -> Bool {
@@ -90,52 +153,64 @@ final class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func buildInputAttribute(from recognizedPoints: [VNHumanHandPoseObservation.JointName: VNRecognizedPoint]) -> MLMultiArray {
-        let joints: [VNHumanHandPoseObservation.JointName] = [
-            .wrist, .thumbCMC, .thumbMP, .thumbIP, .thumbTip,
-            .indexMCP, .indexPIP, .indexDIP, .indexTip,
-            .middleMCP, .middlePIP, .middleDIP, .middleTip,
-            .ringMCP, .ringPIP, .ringDIP, .ringTip,
-            .littleMCP, .littlePIP, .littleDIP, .littleTip
-        ]
+    // Enhanced prediction stabilization
+    private func stabilizePrediction(_ newPrediction: String, confidence: Float) -> String? {
+        // Only consider predictions with reasonable confidence
+        guard confidence > 0.5 else { return nil }
         
-        let attributeArray = joints.flatMap { buildRow(from: recognizedPoints[$0]) }
-        let mlArray = try! MLMultiArray(shape: [1, 3, 21], dataType: .float32)
-        mlArray.dataPointer.initializeMemory(as: Float.self, from: attributeArray, count: attributeArray.count)
-        
-        return mlArray
-    }
-    
-    private func buildRow(from recognizedPoint: VNRecognizedPoint?) -> [Float] {
-        guard let point = recognizedPoint else {
-            return [0.0, 0.0, 0.0]
+        recentPredictions.append(newPrediction)
+        if recentPredictions.count > maxRecentPredictions {
+            recentPredictions.removeFirst()
         }
-        return [Float(point.x), Float(point.y), Float(point.confidence)]
+        
+        // Return most common prediction if we have enough samples
+        if recentPredictions.count >= 3 {
+            let predictionCounts = Dictionary(grouping: recentPredictions, by: { $0 })
+                .mapValues { $0.count }
+            
+            if let mostCommon = predictionCounts.max(by: { $0.value < $1.value }),
+               mostCommon.value >= 2 {
+                return mostCommon.key
+            }
+        }
+        
+        return newPrediction
     }
 }
 
 extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
-    
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        // Only process frames if session is running
+        guard isSessionRunning else { return }
+        
         let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, options: [:])
+        
         do {
             try handler.perform([handPoseRequest])
+            
             if let handObservation = handPoseRequest.results?.first {
-                if let keypointsMultiArray = try? handObservation.keypointsMultiArray() {
+                do {
+                    let keypointsMultiArray = try handObservation.keypointsMultiArray()
                     let prediction = try handPoseClassifier.prediction(poses: keypointsMultiArray)
-                    DispatchQueue.main.async {
-                        self.handPrediction = prediction.label
+                    
+                    // Get prediction confidence
+                    let confidence = prediction.labelProbabilities[prediction.label] ?? 0.0
+                    
+                    // Stabilize prediction
+                    if let stablePrediction = stabilizePrediction(prediction.label, confidence: Float(confidence)) {
+                        DispatchQueue.main.async {
+                            self.handPrediction = stablePrediction
+                            self.predictionConfidence = Float(confidence)
+                        }
                     }
+                } catch {
+                    print("Error processing hand pose: \(error)")
                 }
             }
-//            if let currentFrame = sampleBuffer.cgImage {
-//                addToPreviewStream?(currentFrame)
-//            }
         } catch {
             DispatchQueue.main.async {
                 self.errorMessage = "Error processing frame: \(error.localizedDescription)"
             }
-            captureSession.stopRunning()
         }
     }
 }
@@ -146,4 +221,3 @@ enum CameraManagerError: Error {
     case outputAdditionFailed
     case sessionStartFailed
 }
-

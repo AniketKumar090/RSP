@@ -1,42 +1,41 @@
-//
-//  Winner.swift
-//  RSP
-//
-//  Created by Aniket Kumar on 29/07/24.
-//
-
 import SwiftUI
 
-struct Winner: View {
-    @Environment(\.dismiss) var dismiss
-    let text: Bool
+struct WinnerView: View {
+    let playerWon: Bool
+    let onNewGame: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
-            VStack{
-                if text{
-                    StyledText(text: "Win", backgroundColor: .green)
-                }else{
-                    StyledText(text: "Lost", backgroundColor: .red)
+        VStack(spacing: 30) {
+            // Result display
+            VStack(spacing: 15) {
+                Text(playerWon ? "🎉" : "😢")
+                    .font(.system(size: 80))
+                
+                Text(playerWon ? "You Won!" : "You Lost!")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundStyle(playerWon ? .green : .red)
+                
+                Text(playerWon ? "Great job!" : "Better luck next time!")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+            
+            // Action buttons
+            HStack(spacing: 20) {
+                Button("New Game") {
+                    onNewGame()
+                    dismiss()
                 }
-                HStack{
-                    Button("NewGame"){
-                        AppState.shared.gameID = UUID()
-                    
-                    }.padding()
-                        .background(Color.purple,in: RoundedRectangle(cornerRadius: 25))
-                        .foregroundStyle(.black)
-                        .padding(.leading,20)
-                    Spacer()
-                    Button("EXIT"){
-                        exit(0)
-                    }.padding().foregroundStyle(.black)
-                        .background(Color.red,in: RoundedRectangle(cornerRadius: 25))
-                        .padding(.trailing,20)
+                .buttonStyle(PrimaryButtonStyle(color: .blue))
+                
+                Button("Exit") {
+                    exit(0)
                 }
-              
+                .buttonStyle(PrimaryButtonStyle(color: .red))
+            }
         }
+        .padding()
+        .background(Color(.systemBackground))
     }
 }
-#Preview {
-    Winner(text: true)
-}
-

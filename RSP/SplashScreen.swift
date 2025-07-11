@@ -1,10 +1,3 @@
-//
-//  SplashScreen.swift
-//  RSP
-//
-//  Created by Aniket Kumar on 29/07/24.
-//
-
 import SwiftUI
 
 struct SplashScreen: View {
@@ -40,7 +33,4 @@ struct SplashScreen: View {
             }
         }
     }
-}
-#Preview {
-    SplashScreen()
 }
